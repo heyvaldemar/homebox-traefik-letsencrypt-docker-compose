@@ -1,3 +1,14 @@
+# Image pins live HERE, as interpolation defaults, so `git pull` (or
+# re-downloading this file) delivers the exact version combination this
+# repository has tested — no .env editing required. Setting the matching
+# variable in .env overrides the default for anyone who wants to pin
+# differently; .env itself carries only secrets and deliberate overrides.
+# CI (Trivy scans, check-pin-freshness, the ephemeral test .env) reads
+# the pins from these lines — this block is the single source of truth.
+x-images:
+  traefik: &traefik-image ${TRAEFIK_IMAGE_TAG:-traefik:3.7@sha256:9c2a54d87f76f5c2f5f2682c68394af92fb12c0a2686798d6462a3f84bd78eaf}
+  homebox: &homebox-image ${HOMEBOX_IMAGE_TAG:-ghcr.io/sysadminsmedia/homebox:0.26.2@sha256:b1ad7e3c63f732a5f6daa466e8116be4f545b3b120383a64dcb62beb00a660cc}
+
 networks:
   homebox-network:
     external: true
@@ -10,21 +21,21 @@ volumes:
 
 services:
   homebox:
-    image: ${HOMEBOX_IMAGE_TAG}
+    image: *homebox-image
     volumes:
       - homebox-data:/data/
     environment:
-      HBOX_OPTIONS_ALLOW_REGISTRATION: ${HBOX_OPTIONS_ALLOW_REGISTRATION}
-      HBOX_OPTIONS_AUTO_INCREMENT_ASSET_ID: ${HBOX_OPTIONS_AUTO_INCREMENT_ASSET_ID}
-      HBOX_AUTH_API_KEY_PEPPER: ${HBOX_AUTH_API_KEY_PEPPER}
-      HBOX_LOG_LEVEL: ${HOMEBOX_LOG_LEVEL}
-      HBOX_LOG_FORMAT: ${HOMEBOX_LOG_FORMAT}
-      HBOX_WEB_MAX_UPLOAD_SIZE: ${HOMEBOX_WEB_MAX_UPLOAD_SIZE}
-      HBOX_MAILER_HOST: ${HOMEBOX_SMTP_ADDRESS}
-      HBOX_MAILER_PORT: ${HOMEBOX_SMTP_PORT}
-      HBOX_MAILER_USERNAME: ${HOMEBOX_SMTP_USER_NAME}
-      HBOX_MAILER_PASSWORD: ${HOMEBOX_SMTP_PASSWORD}
-      HBOX_MAILER_FROM: ${HOMEBOX_EMAIL_FROM}
+      HBOX_OPTIONS_ALLOW_REGISTRATION: ${HBOX_OPTIONS_ALLOW_REGISTRATION:-true}
+      HBOX_OPTIONS_AUTO_INCREMENT_ASSET_ID: ${HBOX_OPTIONS_AUTO_INCREMENT_ASSET_ID:-true}
+      HBOX_AUTH_API_KEY_PEPPER: ${HBOX_AUTH_API_KEY_PEPPER:?set in .env - see .env.example for generation command}
+      HBOX_LOG_LEVEL: ${HOMEBOX_LOG_LEVEL:-info}
+      HBOX_LOG_FORMAT: ${HOMEBOX_LOG_FORMAT:-text}
+      HBOX_WEB_MAX_UPLOAD_SIZE: ${HOMEBOX_WEB_MAX_UPLOAD_SIZE:-10}
+      HBOX_MAILER_HOST: ${HOMEBOX_SMTP_ADDRESS:-}
+      HBOX_MAILER_PORT: ${HOMEBOX_SMTP_PORT:-587}
+      HBOX_MAILER_USERNAME: ${HOMEBOX_SMTP_USER_NAME:-}
+      HBOX_MAILER_PASSWORD: ${HOMEBOX_SMTP_PASSWORD:-}
+      HBOX_MAILER_FROM: ${HOMEBOX_EMAIL_FROM:-}
     networks:
       - homebox-network
       - traefik-network
@@ -32,7 +43,7 @@ services:
       # Enable Traefik for this container
       - "traefik.enable=true"
       # Match incoming requests on a specific hostname
-      - "traefik.http.routers.homebox.rule=Host(`${HOMEBOX_HOSTNAME}`)"
+      - "traefik.http.routers.homebox.rule=Host(`${HOMEBOX_HOSTNAME:?set in .env - see .env.example}`)"
       # Assign the router to a named Traefik service
       - "traefik.http.routers.homebox.service=homebox"
       # Use the 'websecure' (HTTPS) entry point
@@ -57,10 +68,10 @@ services:
         condition: service_healthy
 
   traefik:
-    image: ${TRAEFIK_IMAGE_TAG}
+    image: *traefik-image
     command:
       # Set the log level (DEBUG, INFO, WARN, ERROR)
-      - "--log.level=${TRAEFIK_LOG_LEVEL}"
+      - "--log.level=${TRAEFIK_LOG_LEVEL:-WARN}"
       # Enable the built-in API and web-based dashboard
       - "--api.dashboard=true"
       # Enable the /ping endpoint so we can health-check Traefik
@@ -85,7 +96,7 @@ services:
       # Use ACME (Let's Encrypt) to generate/renew certificates via TLS challenge
       - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
       # The email address used by Let's Encrypt for renewal notices
-      - "--certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL:?set in .env - see .env.example}"
       # The file where ACME certificates are stored inside the container
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       # Enable Prometheus metrics
@@ -114,14 +125,14 @@ services:
       # Enable Traefik for this container
       - "traefik.enable=true"
       # A router to expose the Traefik dashboard
-      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_HOSTNAME}`)"
+      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_HOSTNAME:?set in .env - see .env.example}`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.service=api@internal"
       # Basic Authentication for the Traefik dashboard
       - "traefik.http.routers.dashboard.middlewares=authtraefik"
-      - "traefik.http.middlewares.authtraefik.basicauth.users=${TRAEFIK_BASIC_AUTH}"
+      - "traefik.http.middlewares.authtraefik.basicauth.users=${TRAEFIK_BASIC_AUTH:?set in .env - see .env.example for htpasswd generation}"
       # Specify the internal server port to the dashboard service
       - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
       # Pass the original Host header to the backend
