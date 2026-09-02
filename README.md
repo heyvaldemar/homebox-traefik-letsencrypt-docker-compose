@@ -78,6 +78,25 @@ This is deliberately a host-side script and not a container in the stack: an in-
 
 Every service carries memory and CPU limits plus reservations as compose-level defaults — the same values CI boots the stack under. Override any of them in `.env` (the knobs and their defaults are listed in `.env.example`, e.g. `TRAEFIK_MEMORY_LIMIT=512m`) and the override survives every `git pull`. If a service is OOM-killed under real load, `docker inspect <container> --format '{{.State.OOMKilled}}'` says so; raise its `_MEMORY_LIMIT` and recreate.
 
+## Backups
+
+The `backups` container runs on a loop: an initial delay (`HOMEBOX_BACKUP_INIT_SLEEP`, default 30m), then every `HOMEBOX_BACKUP_INTERVAL` (default 24h) it takes a consistent copy of each SQLite database (`homebox.db`) through Python's `sqlite3` backup API - no application stop - and a `tar.gz` of the rest of the data directory (live database files excluded), into the `homebox-backups` volume; files older than `HOMEBOX_BACKUP_PRUNE_DAYS` (default 7) are pruned. Each artefact logs `... backup OK: <file> (<bytes> bytes)` or `FAILED` (kept as `<file>.failed`) — grep the log for `FAILED` from your monitoring.
+
+**Verify backups are running:**
+
+```bash
+docker compose -p homebox logs backups | tail -5
+docker compose -p homebox exec backups ls -la /srv/homebox/backups/
+```
+
+**Restore** a backup set with the interactive script (`chmod +x homebox-restore-data.sh` once): it stops homebox, unpacks the data archive over the data directory, restores each database from its consistent copy, and starts homebox again.
+
+```bash
+./homebox-restore-data.sh
+```
+
+**Off-host replication.** Backups live in a named volume on the same host — bind-mount `HOMEBOX_BACKUPS_PATH` to a directory covered by your off-host backup solution (restic, rclone, Borg, S3 sync).
+
 ## Testing
 
 The [Deployment Verification](https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/actions/workflows/deployment-verification.yml?query=branch%3Amain) workflow runs on every push, pull request, and every Monday at 06:00 UTC: actionlint, Trivy scans of both pinned images, the weekly freshness check, and a deploy-and-test job that boots the stack and requires `/api/v1/status` to report healthy through Traefik.
