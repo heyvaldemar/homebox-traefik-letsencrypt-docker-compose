@@ -101,6 +101,15 @@ docker compose -p homebox exec backups ls -la /srv/homebox/backups/
 
 The [Deployment Verification](https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/actions/workflows/deployment-verification.yml?query=branch%3Amain) workflow runs on every push, pull request, and every day at 06:00 UTC: actionlint, Trivy scans of both pinned images, the weekly freshness check, and a deploy-and-test job that boots the stack and requires `/api/v1/status` to report healthy through Traefik.
 
+### Backup and restore, proven
+
+`tests/e2e-backup-restore.sh` runs against the live stack and is what CI executes after the smoke test. The scenario that matters most is the restore roundtrip: the application is stopped, the baseline database copy is put back, and a row inserted after the baseline is gone. The tests stop the application briefly and write into its data directory — run them on a staging copy with short intervals in `.env` (`HOMEBOX_BACKUP_INIT_SLEEP=15s`, `HOMEBOX_BACKUP_INTERVAL=60s`), never on production.
+
+```bash
+chmod +x tests/e2e-backup-restore.sh
+./tests/e2e-backup-restore.sh
+```
+
 ## Security Notes
 
 - Credentials are read from `.env` at deploy time; `.env` is gitignored and compose fails fast on missing required variables.
