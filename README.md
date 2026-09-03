@@ -1,9 +1,9 @@
-# Homebox + Traefik + Let's Encrypt — Docker Compose
+# Homebox + Traefik + Let's Encrypt on Docker Compose
 
 [![Deployment Verification](https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/actions/workflows/deployment-verification.yml/badge.svg?branch=main)](https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/actions/workflows/deployment-verification.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This repository deploys **Homebox** — a fast inventory and organization system for your home, backed by embedded SQLite — behind **Traefik** with automatic **Let's Encrypt TLS**.
+This repository deploys **Homebox** (a fast inventory and organization system for your home, backed by embedded SQLite) behind **Traefik** with automatic **Let's Encrypt TLS**.
 
 ## Getting started
 
@@ -26,7 +26,7 @@ $EDITOR .env
 docker compose -f homebox-traefik-letsencrypt-docker-compose.yml -p homebox up -d
 ```
 
-Within a minute `https://${HOMEBOX_HOSTNAME}` serves the registration page. **The first account registered is yours** — open it right after deploy, and consider setting `HBOX_OPTIONS_ALLOW_REGISTRATION=false` afterwards.
+Within a minute `https://${HOMEBOX_HOSTNAME}` serves the registration page. **The first account registered is yours**: open it right after deploy, and consider setting `HBOX_OPTIONS_ALLOW_REGISTRATION=false` afterwards.
 
 ### What success looks like
 
@@ -38,20 +38,20 @@ curl -fsk "https://${HOMEBOX_HOSTNAME}/api/v1/status"   # {"health":true,...}
 ### Common first-deploy issues
 
 - **Cert issuance fails.** DNS hasn't propagated or port 80 isn't reachable from the internet.
-- **`docker compose up` fails with `set in .env`.** A required variable is empty; the error names it — current Homebox requires the API key pepper.
+- **`docker compose up` fails with `set in .env`.** A required variable is empty; the error names it. Current Homebox requires the API key pepper.
 - **Networks not found.** Step 2 was skipped.
 
 ## Supply chain trust
 
-Two images — [`traefik`](https://hub.docker.com/_/traefik) and [`ghcr.io/sysadminsmedia/homebox`](https://github.com/sysadminsmedia/homebox/pkgs/container/homebox) — pinned to `tag@sha256:<digest>` as interpolation defaults in the compose `x-images` block. Earlier revisions deployed from the floating `main` tag — every pull could land on an untagged development build; the pin ends that. `git pull` alone delivers the tested combination.
+Two images ([`traefik`](https://hub.docker.com/_/traefik) and [`ghcr.io/sysadminsmedia/homebox`](https://github.com/sysadminsmedia/homebox/pkgs/container/homebox)) pinned to `tag@sha256:<digest>` as interpolation defaults in the compose `x-images` block. Earlier revisions deployed from the floating `main` tag. Every pull could land on an untagged development build; the pin ends that. `git pull` alone delivers the tested combination.
 
 The daily `check-pin-freshness` CI job re-resolves each pin against its registry and compares the pinned versions against the latest upstream releases. GitHub Actions are pinned by commit SHA; Dependabot keeps those fresh.
 
 ## Production checklist
 
 - [ ] **Register your account immediately, then disable open registration** (`HBOX_OPTIONS_ALLOW_REGISTRATION=false`).
-- [ ] **Strong pepper** — 64 random characters; regenerate the Traefik dashboard hash.
-- [ ] **Back up the `homebox-data` volume** — it holds the SQLite database and uploaded photos.
+- [ ] **Strong pepper**: 64 random characters; regenerate the Traefik dashboard hash.
+- [ ] **Back up the `homebox-data` volume**: it holds the SQLite database and uploaded photos.
 - [ ] **Verify Let's Encrypt cert issuance** in the Traefik logs on first start.
 
 ## Unattended updates
@@ -70,17 +70,17 @@ Put it on a timer for hands-off minor/patch updates:
 17 5 * * *  /opt/homebox-traefik-letsencrypt-docker-compose/update.sh >> /var/log/homebox-update.log 2>&1
 ```
 
-The script refuses to cross a MAJOR template version on its own — majors are breaking by definition and their release notes exist to be read. After reading them, `./update.sh --allow-major` performs the jump. It also refuses to touch a checkout with local modifications: your customization belongs in `.env`, which updates never overwrite.
+The script refuses to cross a MAJOR template version on its own: majors are breaking by definition and their release notes exist to be read. After reading them, `./update.sh ‑‑allow-major` performs the jump. It also refuses to touch a checkout with local modifications: your customization belongs in `.env`, which updates never overwrite.
 
 This is deliberately a host-side script and not a container in the stack: an in-stack updater needs the Docker socket (root on the host) and turns "someone pushed to a repo" into "someone deployed to your machine" with no operator in the loop. A cron job under your own user updates only to tagged, CI-verified states and leaves the trust boundary where it was.
 
 ## Resource limits
 
-Every service carries memory and CPU limits plus reservations as compose-level defaults — the same values CI boots the stack under. Override any of them in `.env` (the knobs and their defaults are listed in `.env.example`, e.g. `TRAEFIK_MEMORY_LIMIT=512m`) and the override survives every `git pull`. If a service is OOM-killed under real load, `docker inspect <container> --format '{{.State.OOMKilled}}'` says so; raise its `_MEMORY_LIMIT` and recreate.
+Every service carries memory and CPU limits plus reservations as compose-level defaults: the same values CI boots the stack under. Override any of them in `.env` (the knobs and their defaults are listed in `.env.example`, e.g. `TRAEFIK_MEMORY_LIMIT=512m`) and the override survives every `git pull`. If a service is OOM-killed under real load, `docker inspect <container> ‑‑format '{{.State.OOMKilled}}'` says so; raise its `_MEMORY_LIMIT` and recreate.
 
 ## Backups
 
-The `backups` container runs on a loop: an initial delay (`HOMEBOX_BACKUP_INIT_SLEEP`, default 30m), then every `HOMEBOX_BACKUP_INTERVAL` (default 24h) it takes a consistent copy of each SQLite database (`homebox.db`) through Python's `sqlite3` backup API - no application stop - and a `tar.gz` of the rest of the data directory (live database files excluded), into the `homebox-backups` volume; files older than `HOMEBOX_BACKUP_PRUNE_DAYS` (default 7) are pruned. Each artefact logs `... backup OK: <file> (<bytes> bytes)` or `FAILED` (kept as `<file>.failed`) — grep the log for `FAILED` from your monitoring.
+The `backups` container runs on a loop: an initial delay (`HOMEBOX_BACKUP_INIT_SLEEP`, default 30m), then every `HOMEBOX_BACKUP_INTERVAL` (default 24h) it takes a consistent copy of each SQLite database (`homebox.db`) through Python's `sqlite3` backup API - no application stop - and a `tar.gz` of the rest of the data directory (live database files excluded), into the `homebox-backups` volume; files older than `HOMEBOX_BACKUP_PRUNE_DAYS` (default 7) are pruned. Each artefact logs `... backup OK: <file> (<bytes> bytes)` or `FAILED` (kept as `<file>.failed`). Grep the log for `FAILED` from your monitoring.
 
 **Verify backups are running:**
 
@@ -95,7 +95,7 @@ docker compose -p homebox exec backups ls -la /srv/homebox/backups/
 ./homebox-restore-data.sh
 ```
 
-**Off-host replication.** Backups live in a named volume on the same host — bind-mount `HOMEBOX_BACKUPS_PATH` to a directory covered by your off-host backup solution (restic, rclone, Borg, S3 sync).
+**Off-host replication.** Backups live in a named volume on the same host. Bind-mount `HOMEBOX_BACKUPS_PATH` to a directory covered by your off-host backup solution (restic, rclone, Borg, S3 sync).
 
 ## Container hardening
 
@@ -107,7 +107,7 @@ The [Deployment Verification](https://github.com/heyvaldemar/homebox-traefik-let
 
 ### Backup and restore, proven
 
-`tests/e2e-backup-restore.sh` runs against the live stack and is what CI executes after the smoke test. The scenario that matters most is the restore roundtrip: the application is stopped, the baseline database copy is put back, and a row inserted after the baseline is gone. The tests stop the application briefly and write into its data directory — run them on a staging copy with short intervals in `.env` (`HOMEBOX_BACKUP_INIT_SLEEP=15s`, `HOMEBOX_BACKUP_INTERVAL=60s`), never on production.
+`tests/e2e-backup-restore.sh` runs against the live stack and is what CI executes after the smoke test. The scenario that matters most is the restore roundtrip: the application is stopped, the baseline database copy is put back, and a row inserted after the baseline is gone. The tests stop the application briefly and write into its data directory. Run them on a staging copy with short intervals in `.env` (`HOMEBOX_BACKUP_INIT_SLEEP=15s`, `HOMEBOX_BACKUP_INTERVAL=60s`), never on production.
 
 ```bash
 chmod +x tests/e2e-backup-restore.sh
@@ -126,7 +126,7 @@ chmod +x tests/e2e-backup-restore.sh
 
 <div align="center">
 
-**Maintained by [Vladimir Mikhalev](https://github.com/heyvaldemar)** — Docker Captain · IBM Champion · AWS Community Builder
+**Maintained by [Vladimir Mikhalev](https://github.com/heyvaldemar)** · Docker Captain · IBM Champion · AWS Community Builder
 
 [YouTube](https://www.youtube.com/channel/UCf85kQ0u1sYTTTyKVpxrlyQ?sub_confirmation=1) · [Blog](https://heyvaldemar.com) · [LinkedIn](https://www.linkedin.com/in/heyvaldemar/)
 
