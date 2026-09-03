@@ -3,7 +3,7 @@
 [![Deployment Verification](https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/actions/workflows/deployment-verification.yml/badge.svg?branch=main)](https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/actions/workflows/deployment-verification.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This repository deploys **Homebox** (a fast inventory and organization system for your home, backed by embedded SQLite) behind **Traefik** with automatic **Let's Encrypt TLS**.
+This repository deploys Homebox (a fast inventory and organization system for your home, backed by embedded SQLite) behind Traefik with automatic Let's Encrypt TLS.
 
 ## Getting started
 
@@ -26,7 +26,7 @@ $EDITOR .env
 docker compose -f homebox-traefik-letsencrypt-docker-compose.yml -p homebox up -d
 ```
 
-Within a minute `https://${HOMEBOX_HOSTNAME}` serves the registration page. **The first account registered is yours**: open it right after deploy, and consider setting `HBOX_OPTIONS_ALLOW_REGISTRATION=false` afterwards.
+Within a minute `https://${HOMEBOX_HOSTNAME}` serves the registration page. The first account registered is yours: open it right after deploy, and consider setting `HBOX_OPTIONS_ALLOW_REGISTRATION=false` afterwards.
 
 ### What success looks like
 
@@ -116,7 +116,7 @@ chmod +x tests/e2e-backup-restore.sh
 ./tests/e2e-backup-restore.sh
 ```
 
-## Security Notes
+## Security notes
 
 - Credentials are read from `.env` at deploy time; `.env` is gitignored and compose fails fast on missing required variables.
 - **Pre-rotation advisory.** Releases before v1.0.0 (2026-09-01) shipped a tracked `.env` with a generated-looking API key pepper and SMTP relay credentials. Rotate both if your deployment reused them.
