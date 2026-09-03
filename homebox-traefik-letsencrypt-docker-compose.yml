@@ -6,8 +6,8 @@
 # CI (Trivy scans, check-pin-freshness, the ephemeral test .env) reads
 # the pins from these lines — this block is the single source of truth.
 x-images:
-  traefik: &traefik-image ${TRAEFIK_IMAGE_TAG:-traefik:3.7@sha256:9c2a54d87f76f5c2f5f2682c68394af92fb12c0a2686798d6462a3f84bd78eaf}
-  homebox: &homebox-image ${HOMEBOX_IMAGE_TAG:-ghcr.io/sysadminsmedia/homebox:0.26.2@sha256:b1ad7e3c63f732a5f6daa466e8116be4f545b3b120383a64dcb62beb00a660cc}
+  traefik: &traefik-image ${TRAEFIK_IMAGE_TAG:-traefik:${TRAEFIK_IMAGE_VERSION:-3.7@sha256:9c2a54d87f76f5c2f5f2682c68394af92fb12c0a2686798d6462a3f84bd78eaf}}
+  homebox: &homebox-image ${HOMEBOX_IMAGE_TAG:-ghcr.io/sysadminsmedia/homebox:${HOMEBOX_IMAGE_VERSION:-0.26.2@sha256:b1ad7e3c63f732a5f6daa466e8116be4f545b3b120383a64dcb62beb00a660cc}}
 
 networks:
   homebox-network:
