@@ -7,7 +7,7 @@
 # the pins from these lines — this block is the single source of truth.
 x-images:
   traefik: &traefik-image ${TRAEFIK_IMAGE_TAG:-traefik:${TRAEFIK_IMAGE_VERSION:-3.7@sha256:0f6150202bc1fed72a7bd2107460eaa510e5b8a905f3fdb5b84f2c8619c33368}}
-  homebox: &homebox-image ${HOMEBOX_IMAGE_TAG:-ghcr.io/sysadminsmedia/homebox:${HOMEBOX_IMAGE_VERSION:-0.26.2@sha256:b1ad7e3c63f732a5f6daa466e8116be4f545b3b120383a64dcb62beb00a660cc}}
+  homebox: &homebox-image ${HOMEBOX_IMAGE_TAG:-ghcr.io/sysadminsmedia/homebox:${HOMEBOX_IMAGE_VERSION:-0.27.0@sha256:d49f12caf25ce3fa7f44102bb74953f3dff2dfdad38d87bd9057f3f611e797bb}}
 
 networks:
   homebox-network:

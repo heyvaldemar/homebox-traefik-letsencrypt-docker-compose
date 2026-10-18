@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_(no unreleased changes yet)_
+### Changed
+
+- **`ghcr.io/sysadminsmedia/homebox:0.26.2` moved to `ghcr.io/sysadminsmedia/homebox:0.27.0`.** The freshness check reported the lag; the deploy job booted the stack on the new image before this landed.
 
 ## [1.7.3] - 2026-10-16
 
