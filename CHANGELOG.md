@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_(no unreleased changes yet)_
+
+## [1.7.4] - 2026-10-18
+
 ### Changed
 
 - **`ghcr.io/sysadminsmedia/homebox:0.26.2` moved to `ghcr.io/sysadminsmedia/homebox:0.27.0`.** The freshness check reported the lag; the deploy job booted the stack on the new image before this landed.
@@ -202,7 +206,8 @@ v1.2.0.
   and Traefik release lag); and a deploy-and-test job that boots the
   stack and requires `/api/v1/status` to report healthy through Traefik.
 
-[Unreleased]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.3...HEAD
+[Unreleased]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.4...HEAD
+[1.7.4]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.0...v1.7.1
