@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The data archive is read back before it is called a backup.** The loop renamed the `.partial` archive after `gzip -t`, which tests the compression and nothing inside it: a tar stream tar cannot read, compressed without error, passes. It now lists the whole archive with `tar -tzf` first, and one that does not list is kept as `.failed`. The fleet's conformance rule asks for this read-back and had not been reading this repository's backup loop at all: it did not recognise `tar -C … -zcpf`.
 - **What a restore sets aside stays inside the volume.** Nothing is set aside here, so a restore behaves exactly as before; the script stays the same as the rest of the fleet's, where a kept path moved through the backups container's `/tmp` was copied into the container's own layer and out again.
 - **The restore no longer hands the data root to root.** `homebox-restore-data.sh` put the paths it sets aside back with `cp -a /tmp/restore-keep/. <root>/`, which copies the directory's own owner and mode onto the data root, and the restored database was then given that owner. Homebox's image runs as root on the pinned tag, so no restore of this template as shipped was broken; its `-rootless` tags run unprivileged and would have come back unable to write. Kept paths now go back one by one, and nothing is copied over the root. Found by the AnythingLLM template's first restore test, where an application running as uid 1000 came back unable to write.
 
