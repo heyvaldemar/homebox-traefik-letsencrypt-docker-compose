@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_(no unreleased changes yet)_
+
+## [1.7.11] - 2026-10-31
+
 ### Security
 
 - **`traefik:3.7` was rebuilt upstream**; the pin moved from `sha256:1336e85aaed2…` to `sha256:e9338a01a433…`. Same version, same tag, a rebuilt base image — the usual shape of a security fix in a base layer.
@@ -246,7 +250,8 @@ v1.2.0.
   and Traefik release lag); and a deploy-and-test job that boots the
   stack and requires `/api/v1/status` to report healthy through Traefik.
 
-[Unreleased]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.10...HEAD
+[Unreleased]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.11...HEAD
+[1.7.11]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.10...v1.7.11
 [1.7.10]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.9...v1.7.10
 [1.7.9]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.8...v1.7.9
 [1.7.8]: https://github.com/heyvaldemar/homebox-traefik-letsencrypt-docker-compose/compare/v1.7.7...v1.7.8
